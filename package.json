@@ -1,5 +1,5 @@
 {
-  "name": "eos-util",
+  "name": "eos-utils",
   "version": "0.0.1",
   "description": "Powerful util library based on eosjs.",
   "main": "dist/index.js",
