@@ -93,3 +93,35 @@ export async function getKeyAccounts(publicKey: string): Promise<string[]> {
   const response = await rpc.history_get_key_accounts(publicKey);
   return response.account_names as string[];
 }
+
+export interface TableRows {
+  rows: Array<{ [key: string]: any }>;
+  more: boolean;
+}
+
+export async function getTableRows({
+  code,
+  scope,
+  table,
+  lower_bound = '',
+  upper_bound = '',
+  limit = 100,
+}: {
+  code: string;
+  scope: string;
+  table: string;
+  lower_bound?: unknown;
+  upper_bound?: unknown;
+  limit?: number;
+}): Promise<TableRows> {
+  const rpc = getRandomRpc();
+  return rpc.get_table_rows({
+    json: true,
+    code,
+    scope,
+    table,
+    lower_bound,
+    upper_bound,
+    limit,
+  });
+}

@@ -22,6 +22,9 @@ const eslintrc = {
       },
     },
   ],
+  rules: {
+    camelcase: 0,
+  },
 };
 
 module.exports = eslintrc;
