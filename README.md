@@ -1,4 +1,4 @@
-# eos-util
+# eos-utils
 
 Powerful util library based on eosjs.
 

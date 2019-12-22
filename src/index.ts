@@ -30,7 +30,7 @@ const EOS_API_ENDPOINTS = [
 
 export const EOS_QUANTITY_PRECISION = 4;
 
-function getRandomRpc() {
+export function getRandomRpc() {
   const url = EOS_API_ENDPOINTS[Math.floor(Math.random() * EOS_API_ENDPOINTS.length)];
   return new JsonRpc(url, { fetch });
 }
@@ -63,8 +63,11 @@ export function setApiEndpoint(apiEndpoint: string): void {
   }
 }
 
-export async function sendTransaction(actions: Serialize.Action[], api: Api): Promise<any> {
-  return api.transact(
+export async function sendTransaction(
+  actions: Serialize.Action[],
+  privateKey: string,
+): Promise<any> {
+  return getRandomApi(privateKey).transact(
     {
       actions,
     },
@@ -143,7 +146,7 @@ export async function transfer(
 ): Promise<any> {
   const action = createTransferAction(from, to, symbol, quantity, memo);
 
-  return sendTransaction([action], getRandomApi(privateKey));
+  return sendTransaction([action], privateKey);
 }
 
 export function numericFromName(accountName: string): string {
