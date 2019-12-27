@@ -1,9 +1,10 @@
 // import BigNumber from 'bignumber.js';
-import { Api, JsonRpc, Serialize, Numeric } from 'eosjs';
+import { Api, JsonRpc, Serialize, Numeric, RpcError } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'; // development only
 import { isValidPublic } from 'eosjs-ecc';
 import { getTokenInfo } from 'eos-token-info';
 import { strict as assert } from 'assert';
+import { FetchError } from 'node-fetch';
 
 const fetch = require('node-fetch'); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');
@@ -14,12 +15,10 @@ export const EOS_API_ENDPOINTS = [
   'http://eos.eoscafeblock.com',
   'https://eos.eoscafeblock.com',
   'http://api.main.alohaeos.com',
-  'http://api-mainnet.starteos.io',
   'https://bp.whaleex.com',
   'https://api.zbeos.com',
   'https://node1.zbeos.com',
   'https://api.main.alohaeos.com',
-  'https://api-mainnet.starteos.io',
   'http://peer2.eoshuobipool.com:8181',
   'http://peer1.eoshuobipool.com:8181',
   'https://api.redpacketeos.com',
@@ -27,6 +26,8 @@ export const EOS_API_ENDPOINTS = [
 ];
 
 export const EOS_API_BLACK_LIST = [
+  'http://api-mainnet.starteos.io', // FetchError: invalid json
+  'https://api-mainnet.starteos.io', // FetchError: invalid json
   'https://api.eoslaomao.com', // RpcError: Unknown Endpoint
   'https://node.betdice.one', // FetchError: invalid json
 ];
@@ -213,9 +214,26 @@ export async function getKeyAccounts(publicKey: string): Promise<string[]> {
   if (!isValidPublic(publicKey)) {
     throw new Error(`Invalid public key: ${publicKey}`);
   }
-  const rpc = getRandomRpc();
-  const response = await rpc.history_get_key_accounts(publicKey);
-  return response.account_names as string[];
+
+  let error: Error | undefined;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const rpc = getRandomRpc();
+      // eslint-disable-next-line no-await-in-loop
+      const response = await rpc.history_get_key_accounts(publicKey);
+      return response.account_names as string[];
+    } catch (e) {
+      if (e instanceof RpcError && e.message.includes('Unknown Endpoint')) {
+        // continue
+      } else if (e instanceof FetchError && e.message.includes('invalid json')) {
+        // continue
+      } else {
+        throw e;
+      }
+    }
+  }
+  assert.ok(error);
+  throw error;
 }
 
 export interface TableRows {
@@ -238,14 +256,29 @@ export async function getTableRows({
   upper_bound?: unknown;
   limit?: number;
 }): Promise<TableRows> {
-  const rpc = getRandomRpc();
-  return rpc.get_table_rows({
-    json: true,
-    code,
-    scope,
-    table,
-    lower_bound,
-    upper_bound,
-    limit,
-  });
+  let error: Error | undefined;
+  for (let i = 0; i < 3; i += 1) {
+    try {
+      const rpc = getRandomRpc();
+      return rpc.get_table_rows({
+        json: true,
+        code,
+        scope,
+        table,
+        lower_bound,
+        upper_bound,
+        limit,
+      });
+    } catch (e) {
+      if (e instanceof RpcError && e.message.includes('Unknown Endpoint')) {
+        // continue
+      } else if (e instanceof FetchError && e.message.includes('invalid json')) {
+        // continue
+      } else {
+        throw e;
+      }
+    }
+  }
+  assert.ok(error);
+  throw error;
 }
