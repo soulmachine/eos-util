@@ -8,24 +8,27 @@ import { strict as assert } from 'assert';
 const fetch = require('node-fetch'); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');
 
-const EOS_API_ENDPOINTS = [
+export const EOS_API_ENDPOINTS = [
   'http://eos.infstones.io',
   'https://eos.infstones.io',
   'http://eos.eoscafeblock.com',
   'https://eos.eoscafeblock.com',
-  'https://node.betdice.one',
   'http://api.main.alohaeos.com',
   'http://api-mainnet.starteos.io',
   'https://bp.whaleex.com',
   'https://api.zbeos.com',
   'https://node1.zbeos.com',
   'https://api.main.alohaeos.com',
-  'https://api.eoslaomao.com',
   'https://api-mainnet.starteos.io',
   'http://peer2.eoshuobipool.com:8181',
   'http://peer1.eoshuobipool.com:8181',
   'https://api.redpacketeos.com',
   'https://mainnet.eoscannon.io',
+];
+
+export const EOS_API_BLACK_LIST = [
+  'https://api.eoslaomao.com', // RpcError: Unknown Endpoint
+  'https://node.betdice.one', // FetchError: invalid json
 ];
 
 export const EOS_QUANTITY_PRECISION = 4;
