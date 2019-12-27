@@ -179,6 +179,9 @@ export async function getCurrencyBalance(account: string, symbol: string): Promi
     account,
     symbol,
   );
+  if (balanceInfo.length === 0) {
+    return 0;
+  }
   const balance = parseFloat(balanceInfo[0].split(' ')[0]);
   return balance;
 }
