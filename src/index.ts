@@ -1,28 +1,39 @@
 // import BigNumber from 'bignumber.js';
-import { Api, JsonRpc, Serialize, Numeric, RpcError } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'; // development only
-import { isValidPublic } from 'eosjs-ecc';
-import { getTokenInfo } from 'eos-token-info';
 import { strict as assert } from 'assert';
+import { getTokenInfo } from 'eos-token-info';
+import { Api, JsonRpc, Numeric, RpcError, Serialize } from 'eosjs';
+import { isValidPublic } from 'eosjs-ecc';
+import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'; // development only
 import { FetchError } from 'node-fetch';
 
 const fetch = require('node-fetch'); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');
 
 export const EOS_API_ENDPOINTS = [
-  'http://eos.infstones.io',
-  'https://eos.infstones.io',
-  'http://eos.eoscafeblock.com',
-  'https://eos.eoscafeblock.com',
+  'http://api.eosbeijing.one',
+  'http://api.eoscleaner.com',
+  'http://api.eosrio.io',
+  'http://api.eossweden.org',
   'http://api.main.alohaeos.com',
-  'https://bp.whaleex.com',
-  'https://api.zbeos.com',
-  'https://node1.zbeos.com',
-  'https://api.main.alohaeos.com',
-  'http://peer2.eoshuobipool.com:8181',
+  'http://eos.greymass.com',
+  'http://eos.infstones.io',
+  'http://node.eosflare.io',
   'http://peer1.eoshuobipool.com:8181',
+  'http://peer2.eoshuobipool.com:8181',
+  'https://api.eosbeijing.one',
+  'https://api.eoscleaner.com',
+  'https://api.eosrio.io',
+  'https://api.eossweden.org',
+  'https://api.main.alohaeos.com',
   'https://api.redpacketeos.com',
+  'https://api.zbeos.com',
+  'https://bp.whaleex.com',
+  'https://eos.greymass.com',
+  'https://eos.infstones.io',
+  'https://hapi.eosrio.io',
   'https://mainnet.eoscannon.io',
+  'https://node.eosflare.io',
+  'https://node1.zbeos.com',
 ];
 
 export const EOS_API_BLACK_LIST = [
@@ -30,6 +41,8 @@ export const EOS_API_BLACK_LIST = [
   'https://api-mainnet.starteos.io', // FetchError: invalid json
   'https://api.eoslaomao.com', // RpcError: Unknown Endpoint
   'https://node.betdice.one', // FetchError: invalid json
+  'http://eos.eoscafeblock.com', // getaddrinfo ENOTFOUND
+  'https://eos.eoscafeblock.com', // getaddrinfo ENOTFOUND
 ];
 
 export const EOS_QUANTITY_PRECISION = 4;
@@ -274,9 +287,9 @@ export async function getTableRows({
       });
     } catch (e) {
       if (e instanceof RpcError && e.message.includes('Unknown Endpoint')) {
-        // continue
+        error = e;
       } else if (e instanceof FetchError && e.message.includes('invalid json')) {
-        // continue
+        error = e;
       } else {
         throw e;
       }
