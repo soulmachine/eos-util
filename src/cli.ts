@@ -4,7 +4,6 @@ import { RpcError } from 'eosjs';
 import { FetchError } from 'node-fetch';
 import {
   accountExists,
-  EOS_API_BLACK_LIST,
   EOS_API_ENDPOINTS,
   getCurrencyBalance,
   getKeyAccounts,
@@ -25,7 +24,7 @@ async function checkApiEndpoint(url: string): Promise<boolean> {
 
     await accountExists('cryptoforest', url);
 
-    await getCurrencyBalance('cryptoforest', 'EOS');
+    await getCurrencyBalance('cryptoforest', 'EOS', url);
 
     await getKeyAccounts('EOS6zQQQXEgT9jmy9NHahAXqTRV4LaeCUwsE8XP8MP557Kn6s3KxP', url);
 
@@ -52,8 +51,4 @@ async function checkApiEndpoint(url: string): Promise<boolean> {
     if (success[i]) result.push(EOS_API_ENDPOINTS[i]);
   }
   console.info(result);
-
-  for (let i = 0; i < EOS_API_BLACK_LIST.length; i += 1) {
-    await checkApiEndpoint(EOS_API_BLACK_LIST[i]);
-  }
 })();
