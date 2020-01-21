@@ -6,6 +6,7 @@ import {
   accountExists,
   EOS_API_BLACK_LIST,
   EOS_API_ENDPOINTS,
+  getCurrencyBalance,
   getKeyAccounts,
   getTableRows,
   numericFromName,
@@ -23,6 +24,8 @@ async function checkApiEndpoint(url: string): Promise<boolean> {
     );
 
     await accountExists('cryptoforest', url);
+
+    await getCurrencyBalance('cryptoforest', 'EOS');
 
     await getKeyAccounts('EOS6zQQQXEgT9jmy9NHahAXqTRV4LaeCUwsE8XP8MP557Kn6s3KxP', url);
 
