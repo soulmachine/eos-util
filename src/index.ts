@@ -1,10 +1,9 @@
 // import BigNumber from 'bignumber.js';
 import { strict as assert } from 'assert';
 import { getTokenInfo } from 'eos-token-info';
-import { Api, JsonRpc, Numeric, RpcError, Serialize } from 'eosjs';
+import { Api, JsonRpc, Numeric, Serialize } from 'eosjs';
 import { isValidPublic } from 'eosjs-ecc';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'; // development only
-import { FetchError } from 'node-fetch';
 
 const fetch = require('node-fetch'); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');
@@ -179,7 +178,7 @@ export function numericFromName(accountName: string): string {
 
 export async function queryTransaction(txid: string, blockNum?: number): Promise<any> {
   const rpc = getRandomRpc();
-  const response = await rpc.history_get_transaction(txid, blockNum); // eslint-disable-line no-await-in-loop
+  const response = await rpc.history_get_transaction(txid, blockNum);
   if (response.transaction_id || response.id) {
     return response;
   }
@@ -231,25 +230,9 @@ export async function getKeyAccounts(publicKey: string): Promise<string[]> {
     throw new Error(`Invalid public key: ${publicKey}`);
   }
 
-  let error: Error | undefined;
-  for (let i = 0; i < 3; i += 1) {
-    try {
-      const rpc = getRandomRpc();
-      // eslint-disable-next-line no-await-in-loop
-      const response = await rpc.history_get_key_accounts(publicKey);
-      return response.account_names as string[];
-    } catch (e) {
-      if (e instanceof RpcError && e.message.includes('Unknown Endpoint')) {
-        // continue
-      } else if (e instanceof FetchError && e.message.includes('invalid json')) {
-        // continue
-      } else {
-        throw e;
-      }
-    }
-  }
-  assert.ok(error);
-  throw error;
+  const rpc = getRandomRpc();
+  const response = await rpc.history_get_key_accounts(publicKey);
+  return response.account_names as string[];
 }
 
 export interface TableRows {
@@ -272,29 +255,14 @@ export async function getTableRows({
   upper_bound?: unknown;
   limit?: number;
 }): Promise<TableRows> {
-  let error: Error | undefined;
-  for (let i = 0; i < 3; i += 1) {
-    try {
-      const rpc = getRandomRpc();
-      return rpc.get_table_rows({
-        json: true,
-        code,
-        scope,
-        table,
-        lower_bound,
-        upper_bound,
-        limit,
-      });
-    } catch (e) {
-      if (e instanceof RpcError && e.message.includes('Unknown Endpoint')) {
-        error = e;
-      } else if (e instanceof FetchError && e.message.includes('invalid json')) {
-        error = e;
-      } else {
-        throw e;
-      }
-    }
-  }
-  assert.ok(error);
-  throw error;
+  const rpc = getRandomRpc();
+  return rpc.get_table_rows({
+    json: true,
+    code,
+    scope,
+    table,
+    lower_bound,
+    upper_bound,
+    limit,
+  });
 }
