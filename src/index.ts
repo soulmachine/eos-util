@@ -10,25 +10,24 @@ const { TextEncoder, TextDecoder } = require('util');
 
 export const EOS_API_ENDPOINTS = [
   'http://api.eosbeijing.one',
-  'http://api.eoscleaner.com',
-  'http://api.eosrio.io',
   'http://api.eossweden.org',
   'http://api.main.alohaeos.com',
+  'http://bp.whaleex.com',
+  'http://eos.eoscafeblock.com',
   'http://eos.greymass.com',
   'http://eos.infstones.io',
-  'http://node.eosflare.io',
+  'http://eos.unlimitedeos.com:7777',
   'http://peer1.eoshuobipool.com:8181',
   'http://peer2.eoshuobipool.com:8181',
   'https://api.eosbeijing.one',
-  'https://api.eoscleaner.com',
-  'https://api.eosrio.io',
   'https://api.eossweden.org',
   'https://api.main.alohaeos.com',
-  'https://api.redpacketeos.com',
   'https://api.zbeos.com',
   'https://bp.whaleex.com',
+  'https://eos.eoscafeblock.com',
   'https://eos.greymass.com',
   'https://eos.infstones.io',
+  'https://eosbp.atticlab.net',
   'https://hapi.eosrio.io',
   'https://mainnet.eoscannon.io',
   'https://node.eosflare.io',
@@ -40,19 +39,18 @@ export const EOS_API_BLACK_LIST = [
   'https://api-mainnet.starteos.io', // FetchError: invalid json
   'https://api.eoslaomao.com', // RpcError: Unknown Endpoint
   'https://node.betdice.one', // FetchError: invalid json
-  'http://eos.eoscafeblock.com', // getaddrinfo ENOTFOUND
-  'https://eos.eoscafeblock.com', // getaddrinfo ENOTFOUND
 ];
 
 export const EOS_QUANTITY_PRECISION = 4;
 
-export function getRandomRpc() {
-  const url = EOS_API_ENDPOINTS[Math.floor(Math.random() * EOS_API_ENDPOINTS.length)];
+export function getRandomRpc(apiEndpoint?: string) {
+  const url =
+    apiEndpoint || EOS_API_ENDPOINTS[Math.floor(Math.random() * EOS_API_ENDPOINTS.length)];
   return new JsonRpc(url, { fetch });
 }
 
-export function getRandomApi(privateKey: string) {
-  const rpc = getRandomRpc();
+export function getRandomApi(privateKey: string, apiEndpoint?: string) {
+  const rpc = getRandomRpc(apiEndpoint);
   const api = new Api({
     rpc,
     signatureProvider: new JsSignatureProvider([privateKey]),
@@ -62,28 +60,12 @@ export function getRandomApi(privateKey: string) {
   return api;
 }
 
-/**
- * Set a customized API endpoint.
- *
- * Usually you don't need to call this API unless you want to use a different API endpoint instead of default ones.
- *
- * By default this library contains a list of seed API endpoints, if you want to use a different
- * API endpoint, call this function.
- *
- * @param apiEndpoint an API endpoint
- */
-export function setApiEndpoint(apiEndpoint: string): void {
-  if (apiEndpoint) {
-    // clear EOS_API_ENDPOINTS and set apiEndpoint as its only one element
-    EOS_API_ENDPOINTS.splice(0, EOS_API_ENDPOINTS.length, apiEndpoint);
-  }
-}
-
 export async function sendTransaction(
   actions: Serialize.Action[],
   privateKey: string,
+  apiEndpoint?: string,
 ): Promise<any> {
-  return getRandomApi(privateKey).transact(
+  return getRandomApi(privateKey, apiEndpoint).transact(
     {
       actions,
     },
@@ -176,8 +158,12 @@ export function numericFromName(accountName: string): string {
   return Numeric.binaryToDecimal(sb.getUint8Array(8));
 }
 
-export async function queryTransaction(txid: string, blockNum?: number): Promise<any> {
-  const rpc = getRandomRpc();
+export async function queryTransaction(
+  txid: string,
+  blockNum?: number,
+  apiEndpoint?: string,
+): Promise<any> {
+  const rpc = getRandomRpc(apiEndpoint);
   const response = await rpc.history_get_transaction(txid, blockNum);
   if (response.transaction_id || response.id) {
     return response;
@@ -185,8 +171,12 @@ export async function queryTransaction(txid: string, blockNum?: number): Promise
   throw Error('Unknown response format');
 }
 
-export async function getCurrencyBalance(account: string, symbol: string): Promise<number> {
-  const balanceInfo = await getRandomRpc().get_currency_balance(
+export async function getCurrencyBalance(
+  account: string,
+  symbol: string,
+  apiEndpoint?: string,
+): Promise<number> {
+  const balanceInfo = await getRandomRpc(apiEndpoint).get_currency_balance(
     getTokenInfo(symbol).contract,
     account,
     symbol,
@@ -204,8 +194,8 @@ export async function getCurrencyBalance(account: string, symbol: string): Promi
  * @param accountName EOS account name
  * @return true if exists, otherwise false
  */
-export async function accountExists(accountName: string): Promise<boolean> {
-  const rpc = getRandomRpc();
+export async function accountExists(accountName: string, apiEndpoint?: string): Promise<boolean> {
+  const rpc = getRandomRpc(apiEndpoint);
 
   const { rows } = await rpc.get_table_rows({
     json: true,
@@ -225,12 +215,12 @@ export async function accountExists(accountName: string): Promise<boolean> {
  * @param publicKey EOS public key
  * @returns an array of account names, empty if not exist
  */
-export async function getKeyAccounts(publicKey: string): Promise<string[]> {
+export async function getKeyAccounts(publicKey: string, apiEndpoint?: string): Promise<string[]> {
   if (!isValidPublic(publicKey)) {
     throw new Error(`Invalid public key: ${publicKey}`);
   }
 
-  const rpc = getRandomRpc();
+  const rpc = getRandomRpc(apiEndpoint);
   const response = await rpc.history_get_key_accounts(publicKey);
   return response.account_names as string[];
 }
@@ -240,22 +230,25 @@ export interface TableRows {
   more: boolean;
 }
 
-export async function getTableRows({
-  code,
-  scope,
-  table,
-  lower_bound = '',
-  upper_bound = '',
-  limit = 100,
-}: {
-  code: string;
-  scope: string;
-  table: string;
-  lower_bound?: unknown;
-  upper_bound?: unknown;
-  limit?: number;
-}): Promise<TableRows> {
-  const rpc = getRandomRpc();
+export async function getTableRows(
+  {
+    code,
+    scope,
+    table,
+    lower_bound = '',
+    upper_bound = '',
+    limit = 100,
+  }: {
+    code: string;
+    scope: string;
+    table: string;
+    lower_bound?: unknown;
+    upper_bound?: unknown;
+    limit?: number;
+  },
+  apiEndpoint?: string,
+): Promise<TableRows> {
+  const rpc = getRandomRpc(apiEndpoint);
   return rpc.get_table_rows({
     json: true,
     code,
