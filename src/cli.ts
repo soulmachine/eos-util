@@ -6,6 +6,7 @@ import {
   accountExists,
   EOS_API_ENDPOINTS,
   getCurrencyBalance,
+  getCurrencyStats,
   getKeyAccounts,
   getTableRows,
   numericFromName,
@@ -42,6 +43,8 @@ async function checkApiEndpoint(url: string): Promise<boolean> {
 
 (async () => {
   console.info(numericFromName('cryptoforest'));
+
+  console.info(await getCurrencyStats('eosiopowcoin', 'POW'));
 
   const requests = EOS_API_ENDPOINTS.map(x => checkApiEndpoint(x));
   const success = await Promise.all(requests);

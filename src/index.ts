@@ -18,9 +18,12 @@ export const EOS_API_ENDPOINTS = [
   'http://peer1.eoshuobipool.com:8181',
   'http://peer2.eoshuobipool.com:8181',
   'https://bp.whaleex.com',
-  'https://eos.eoscafeblock.com',
   'https://eos.greymass.com',
-  'https://node1.zbeos.com',
+];
+
+export const EOS_API_ENDPOINTS_BLACK_LIST = [
+  'https://eos.eoscafeblock.com', // Unexpected token < in JSON
+  'https://node1.zbeos.com', // Unexpected token < in JSON
 ];
 
 export const EOS_QUANTITY_PRECISION = 4;
@@ -240,4 +243,14 @@ export async function getTableRows(
     upper_bound,
     limit,
   });
+}
+
+export async function getCurrencyStats(
+  contract: string,
+  symbol: string,
+  apiEndpoint?: string,
+): Promise<{ supply: string; max_supply: string; issuer: string }> {
+  const rpc = getRandomRpc(apiEndpoint);
+  const stats = await rpc.get_currency_stats(contract, symbol);
+  return stats[symbol];
 }

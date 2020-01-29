@@ -1,6 +1,6 @@
 {
   "name": "eos-utils",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Powerful util library based on eosjs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,14 +33,14 @@
   },
   "homepage": "https://github.com/soulmachine/eos-utils#readme",
   "devDependencies": {
-    "@types/node": "^13.1.8",
+    "@types/node": "^13.5.1",
     "@types/node-fetch": "^2.5.4",
     "@types/text-encoding": "0.0.35",
-    "@typescript-eslint/eslint-plugin": "^2.17.0",
-    "@typescript-eslint/parser": "^2.17.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.9.0",
+    "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jest": "^23.6.0",
     "eslint-plugin-markdown": "^1.0.1",
@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "eos-token-info": "0.0.8",
+    "eos-token-info": "0.1.0",
     "eosjs": "^20.0.3",
     "eosjs-ecc": "^4.0.7",
     "node-fetch": "^2.6.0"
