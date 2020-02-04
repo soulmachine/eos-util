@@ -9,19 +9,19 @@ const fetch = require('node-fetch'); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');
 
 export const EOS_API_ENDPOINTS = [
-  'http://api.eossweden.org',
   'http://api.main.alohaeos.com',
-  'http://bp.whaleex.com',
   'http://eos.greymass.com',
   'http://eos.infstones.io',
   'http://eos.unlimitedeos.com:7777',
   'http://peer1.eoshuobipool.com:8181',
   'http://peer2.eoshuobipool.com:8181',
-  'https://bp.whaleex.com',
   'https://eos.greymass.com',
 ];
 
 export const EOS_API_ENDPOINTS_BLACK_LIST = [
+  'http://api.eossweden.org', // Unexpected token < in JSON
+  'http://bp.whaleex.com', // Unexpected token < in JSON
+  'https://bp.whaleex.com', // Unexpected token < in JSON
   'https://eos.eoscafeblock.com', // Unexpected token < in JSON
   'https://node1.zbeos.com', // Unexpected token < in JSON
 ];
